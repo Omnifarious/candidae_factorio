@@ -152,6 +152,9 @@ function itemCountAllowed(name, count, player)
     elseif string.match(name, ".*module.*") then
         -- allow modules
         return count
+    elseif name == "mining-drone" or name == "transport-drone" then
+        -- allow up to 200 drones, as they need to be hand-inserted to set request amount.
+        return math.min(200,count)
     end
     return 0
 end
