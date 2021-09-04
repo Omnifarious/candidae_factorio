@@ -1,53 +1,73 @@
-default_qb_slots = {
-        [1]  = "transport-belt",
-        [2]  = "underground-belt",
-        [3]  = "splitter",
-        [4]  = "inserter",
-        [5]  = "long-handed-inserter",
-        [6]  = "medium-electric-pole",
-        [7]  = "assembling-machine-1",
-        [8]  = "small-lamp",
-        [9]  = "stone-furnace",
-        [10] = "electric-mining-drill",
-        [11] = "roboport",
-        [12] = "logistic-chest-storage",
-        [13] = "logistic-chest-requester",
-        [14] = "logistic-chest-passive-provider",
-        [15] = "logistic-chest-buffer",
-        [16] = "gun-turret",
-        [17] = "stone-wall",
-        [18] = nil,
-        [19] = nil,
-        [20] = "radar",
-        [21] = "offshore-pump",
-        [22] = "pipe-to-ground",
-        [23] = "pipe",
-        [24] = "boiler",
-        [25] = "steam-engine",
-        [26] = "burner-inserter"
-}
+local function get_default_qb_slots(seablock_enabled)
+    local qb_slots
+    if seablock_enabled then
+        qb_slots = {
+                [1]  = game.item_prototypes["basic-transport-belt"] and "basic-transport-belt" or "transport-belt",
+                [2]  = game.item_prototypes["basic-underground-belt"] and "basic-underground-belt" or "underground-belt",
+                [3]  = game.item_prototypes["basic-transport-belt"] and "basic-splitter" or "splitter",
+                [4]  = "inserter",
+                [5]  = "assembling-machine-1",
+                [6]  = "small-electric-pole",
+                [7]  = "stone-pipe",
+                [8]  = "stone-pipe-to-ground",
+                [9]  = "offshore-pump",
+                [10] = "small-lamp",
+                [11] = "roboport",
+                [12] = "logistic-chest-storage",
+                [13] = "logistic-chest-requester",
+                [14] = "logistic-chest-passive-provider",
+                [15] = "logistic-chest-buffer",
+                [16] = nil,
+                [17] = nil,
+                [18] = nil,
+                [19] = nil,
+                [20] = nil,
+                [21] = "angels-electrolyser",
+                [22] = "angels-flare-stack",
+                [23] = "burner-ore-crusher",
+                [24] = "liquifier",
+                [25] = "crystallizer",
+                [26] = "stone-furnace",
+                [27] = "algae-farm"
+        }
+    else
+        qb_slots = {
+                [1]  = game.item_prototypes["basic-transport-belt"] and "basic-transport-belt" or "transport-belt",
+                [2]  = game.item_prototypes["basic-underground-belt"] and "basic-underground-belt" or "underground-belt",
+                [3]  = game.item_prototypes["basic-transport-belt"] and "basic-splitter" or "splitter",
+                [4]  = "inserter",
+                [5]  = "long-handed-inserter",
+                [6]  = "medium-electric-pole",
+                [7]  = "assembling-machine-1",
+                [8]  = "small-lamp",
+                [9]  = "stone-furnace",
+                [10] = "electric-mining-drill",
+                [11] = "roboport",
+                [12] = "logistic-chest-storage",
+                [13] = "logistic-chest-requester",
+                [14] = "logistic-chest-passive-provider",
+                [15] = "logistic-chest-buffer",
+                [16] = "gun-turret",
+                [17] = "stone-wall",
+                [18] = nil,
+                [19] = nil,
+                [20] = "radar",
+                [21] = "offshore-pump",
+                [22] = "pipe-to-ground",
+                [23] = "pipe",
+                [24] = "boiler",
+                [25] = "steam-engine",
+                [26] = "burner-inserter"
+        }
+    end
+    return qb_slots
+end
 
-function inventoryChanged(event)
+local function inventoryChanged(event)
     if global.creative then
         return
     end
     local player = game.players[event.player_index]
-    if not global.seablocked then
-        -- tiny hack to work around that SeaBlock sets up stuff after BNW on load
-        global.seablocked = true
-        -- move everything from the Home rock to the other chest
-        local home_rock = player.surface.find_entity("rock-chest", {0.5, 0.5})
-        if home_rock then
-            for name, count in pairs(home_rock.get_inventory(defines.inventory.chest).get_contents()) do
-                global.seablock_chest.insert{name = name, count = count}
-            end
-        end
-        home_rock.destroy()
-        global.seablock_chest = nil
-
-        -- and clear the starting items from player inventory
-        player.clear_items_inside()
-    end
     -- remove any crafted items (and possibly make ghost cursor of item)
     for _, item in pairs(global.players[event.player_index].crafted) do
         if itemCountAllowed(item.name, item.count, player) == 0 then
@@ -91,7 +111,7 @@ function inventoryChanged(event)
     end
 end
 
-function dropItems(player, name, count)
+local function dropItems(player, name, count)
     local entity = player.opened or player.selected
     local inserted = 0
     if entity and entity.insert then
@@ -125,7 +145,7 @@ function dropItems(player, name, count)
     end
 end
 
-function itemCountAllowed(name, count, player)
+local function itemCountAllowed(name, count, player)
     local item = game.item_prototypes[name]
     local place_type = item.place_result and item.place_result.type
     if name == "red-wire" or name == "green-wire" then
@@ -153,7 +173,7 @@ function itemCountAllowed(name, count, player)
     return 0
 end
 
-function setupForce(force, surface, x, y, seablock_enabled)
+local function setupForce(force, surface, x, y, seablock_enabled)
     if not global.forces then
         global.forces = {}
     end
@@ -179,15 +199,19 @@ function setupForce(force, surface, x, y, seablock_enabled)
     force.technologies["logistic-system"].researched = true
 
     -- research some techs that require manual labour
-    if seablock_enabled then
-        force.technologies["sb-startup1"].researched = true
-        force.technologies["sb-startup2"].researched = true
-        force.technologies["bio-paper-1"].researched = true
-        force.technologies["bio-wood-processing"].researched = true
-        force.technologies["sb-startup3"].researched = true
-        force.technologies["sb-startup4"].researched = true
-        force.technologies["sct-lab-t1"].researched = true
-        force.technologies["sct-automation-science-pack"].researched = true
+    local seablock_items = {}
+    if seablock_enabled and remote.interfaces["SeaBlock"] then
+        seablock_items = remote.call("SeaBlock", "get_starting_items")
+        remote.call("SeaBlock", "set_starting_items", nil)
+
+        local unlocks = remote.call("SeaBlock", "get_unlocks")
+        for _,techs in pairs(unlocks) do
+            for _,tech in pairs(techs) do
+                if force.technologies[tech] then
+                    force.technologies[tech].researched = true
+                end
+            end
+        end
     end
 
     -- setup starting location
@@ -290,24 +314,23 @@ function setupForce(force, surface, x, y, seablock_enabled)
     local electric_pole = surface.create_entity{name = "medium-electric-pole", position = {x + 1, y + 2}, force = force, raise_built = true}
     -- radar
     surface.create_entity{name = "radar", position = {x - 1, y + 3}, force = force, raise_built = true}
-    -- storage chest
-    local seablock_chest = surface.create_entity{name = "logistic-chest-storage", position = {x + 1, y + 3}, force = force, raise_built = true}
     -- storage chest, contains the items the force starts with
-    local chest = surface.create_entity{name = "logistic-chest-storage", position = {x + 1, y + 4}, force = force, raise_built = true}
-    local chest_inventory = chest.get_inventory(defines.inventory.chest)
-    chest_inventory.insert{name = "transport-belt", count = 400}
-    chest_inventory.insert{name = "underground-belt", count = 20}
-    chest_inventory.insert{name = "splitter", count = 10}
-    chest_inventory.insert{name = "pipe", count = 20}
-    chest_inventory.insert{name = "pipe-to-ground", count = 10}
-    chest_inventory.insert{name = "burner-inserter", count = 4}
+    local chest1 = surface.create_entity{name = "logistic-chest-storage", position = {x + 1, y + 3}, force = force, raise_built = true}
+    local chest2 = surface.create_entity{name = "logistic-chest-storage", position = {x + 1, y + 4}, force = force, raise_built = true}
+    local chest_inventory = chest1.get_inventory(defines.inventory.chest)
+
+    if game.item_prototypes["basic-transport-belt"] then
+        chest_inventory.insert{name = "basic-transport-belt", count = 400}
+        chest_inventory.insert{name = "basic-underground-belt", count = 20}
+        chest_inventory.insert{name = "basic-splitter", count = 10}
+    else
+        chest_inventory.insert{name = "transport-belt", count = 400}
+        chest_inventory.insert{name = "underground-belt", count = 20}
+        chest_inventory.insert{name = "splitter", count = 10}
+    end
     chest_inventory.insert{name = "inserter", count = 20}
-    chest_inventory.insert{name = "medium-electric-pole", count = 50}
-    chest_inventory.insert{name = "small-lamp", count = 10}
     chest_inventory.insert{name = "stone-furnace", count = 4}
     chest_inventory.insert{name = "offshore-pump", count = 1}
-    chest_inventory.insert{name = "boiler", count = 1}
-    chest_inventory.insert{name = "steam-engine", count = 2}
     chest_inventory.insert{name = "assembling-machine-1", count = 4}
     chest_inventory.insert{name = "roboport", count = 4}
     chest_inventory.insert{name = "logistic-chest-storage", count = 2}
@@ -316,25 +339,42 @@ function setupForce(force, surface, x, y, seablock_enabled)
     chest_inventory.insert{name = "logistic-chest-buffer", count = 4}
     chest_inventory.insert{name = "logistic-chest-active-provider", count = 4}
     chest_inventory.insert{name = "lab", count = 2}
-    chest_inventory.insert{name = "gun-turret", count = 2}
-    chest_inventory.insert{name = "firearm-magazine", count = 20}
     if seablock_enabled then
         -- need some stuff for SeaBlock so we won't get stuck (also slightly accelerate gameplay)
-        chest_inventory.insert{name = "ore-crusher", count = 4}
-        chest_inventory.insert{name = "angels-electrolyser", count = 1}
-        chest_inventory.insert{name = "liquifier", count = 2}
-        chest_inventory.insert{name = "algae-farm", count = 2}
-        chest_inventory.insert{name = "hydro-plant", count = 1}
-        chest_inventory.insert{name = "crystallizer", count = 1}
-        chest_inventory.insert{name = "angels-flare-stack", count = 2}
-        chest_inventory.insert{name = "clarifier", count = 1}
+        chest_inventory.insert{name = "offshore-pump", count = 1}
         chest_inventory.insert{name = "wood-pellets", count = 50}
-        global.seablock_chest = seablock_chest
+        chest_inventory = chest2.get_inventory(defines.inventory.chest)
+        chest_inventory.insert{name = "angels-electrolyser", count = 4}
+        chest_inventory.insert{name = "angels-flare-stack", count = 2}
+        chest_inventory.insert{name = "burner-ore-crusher", count = 3}
+        chest_inventory.insert{name = "liquifier", count = 1}
+        chest_inventory.insert{name = "crystallizer", count = 1}
+        chest_inventory.insert{name = "algae-farm", count = 2}
+
+        local ignored_items = {
+            ["copper-pipe"] = true,
+            ["iron-gear-wheel"] = true,
+            ["iron-stick"] = true,
+            ["pipe"] = true,
+            ["pipe-to-ground"] = true,
+        }
+        for item_name, item_count in pairs(seablock_items) do
+            if not ignored_items[item_name] then
+              chest_inventory.insert{name = item_name, count = item_count}
+            end
+        end
     else
-        -- prevent error when looking for "rock-chest" later
-        global.seablocked = true
         -- only give player this when we're not seablocking
         chest_inventory.insert{name = "electric-mining-drill", count = 4}
+        chest_inventory.insert{name = "pipe", count = 20}
+        chest_inventory.insert{name = "pipe-to-ground", count = 10}
+        chest_inventory.insert{name = "burner-inserter", count = 4}
+        chest_inventory.insert{name = "medium-electric-pole", count = 50}
+        chest_inventory.insert{name = "small-lamp", count = 10}
+        chest_inventory.insert{name = "boiler", count = 1}
+        chest_inventory.insert{name = "steam-engine", count = 2}
+        chest_inventory.insert{name = "gun-turret", count = 2}
+        chest_inventory.insert{name = "firearm-magazine", count = 20}
     end
     -- solar panels and accumulators (left side)
     surface.create_entity{name = "solar-panel", position = {x - 11, y - 2}, force = force, raise_built = true}
@@ -376,7 +416,7 @@ function setupForce(force, surface, x, y, seablock_enabled)
     accumulator.energy = 5000000
 end
 
-function preventMining(player)
+local function preventMining(player)
     -- prevent mining (this appeared to be reset when loading a 0.16.26 save in 0.16.27)
     player.force.manual_mining_speed_modifier = -0.99999999 -- allows removing ghosts with right-click
 end
@@ -400,6 +440,10 @@ script.on_event(defines.events.on_player_created, function(event)
     player.disable_flashlight()
     -- enable cheat mode
     player.cheat_mode = true
+    
+    local seablock_enabled = game.active_mods["SeaBlock"] and true or false
+
+    local default_qb_slots = get_default_qb_slots(seablock_enabled)
 
     -- Set-up a sane default for the quickbar
     for i = 1, 100 do
@@ -412,7 +456,7 @@ script.on_event(defines.events.on_player_created, function(event)
 
     global.bnw_scenario_version = game.active_mods["brave-new-world"]
     -- setup force
-    setupForce(player.force, player.surface, 0, 0, game.active_mods["SeaBlock"])
+    setupForce(player.force, player.surface, 0, 0, seablock_enabled)
     preventMining(player)
 end)
 
