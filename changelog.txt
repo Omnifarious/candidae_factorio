@@ -1,13 +1,4 @@
 ---------------------------------------------------------------------------------------------------
-Version: 4.1.2
-Date: ???
-  Changes:
-    - Start with Bob's grey belts when they are enabled
-    - Update starting items for Sea Block
-    - Prevent Sea Block rock chest from spawning
-  Bugfixes:
-    - Fixed crash when picking up an item in editor mode
----------------------------------------------------------------------------------------------------
 Version: 4.1.1
 Date: 27. 12. 2020
   Changes:
