@@ -1,4 +1,4 @@
-local function get_default_qb_slots(seablock_enabled)
+local function get_default_qb_slots(seablock_enabled, nobelts_enabled)
     local qb_slots
     if seablock_enabled then
         qb_slots = {
@@ -177,7 +177,7 @@ local function inventoryChanged(event)
     end
 end
 
-local function setupForce(force, surface, x, y, seablock_enabled)
+local function setupForce(force, surface, x, y, seablock_enabled, nobelts_enabled)
     if not global.forces then
         global.forces = {}
     end
@@ -337,11 +337,19 @@ local function setupForce(force, surface, x, y, seablock_enabled)
     chest_inventory.insert{name = "offshore-pump", count = 1}
     chest_inventory.insert{name = "assembling-machine-1", count = 4}
     chest_inventory.insert{name = "roboport", count = 4}
-    chest_inventory.insert{name = "logistic-chest-storage", count = 2}
-    chest_inventory.insert{name = "logistic-chest-passive-provider", count = 4}
-    chest_inventory.insert{name = "logistic-chest-requester", count = 4}
-    chest_inventory.insert{name = "logistic-chest-buffer", count = 4}
-    chest_inventory.insert{name = "logistic-chest-active-provider", count = 4}
+    if nobelts_enabled then
+        chest_inventory.insert{name = "logistic-chest-storage", count = 38}
+        chest_inventory.insert{name = "logistic-chest-passive-provider", count = 40}
+        chest_inventory.insert{name = "logistic-chest-requester", count = 40}
+        chest_inventory.insert{name = "logistic-chest-buffer", count = 40}
+        chest_inventory.insert{name = "logistic-chest-active-provider", count = 40}
+    else
+        chest_inventory.insert{name = "logistic-chest-storage", count = 2}
+        chest_inventory.insert{name = "logistic-chest-passive-provider", count = 4}
+        chest_inventory.insert{name = "logistic-chest-requester", count = 4}
+        chest_inventory.insert{name = "logistic-chest-buffer", count = 4}
+        chest_inventory.insert{name = "logistic-chest-active-provider", count = 4}
+    end
     chest_inventory.insert{name = "lab", count = 2}
     if seablock_enabled then
         -- need some stuff for SeaBlock so we won't get stuck (also slightly accelerate gameplay)
@@ -446,8 +454,9 @@ script.on_event(defines.events.on_player_created, function(event)
     player.cheat_mode = true
 
     local seablock_enabled = game.active_mods["SeaBlock"] and true or false
+    local nobelts_enabled = game.active_mods["no-belts"] and true or false
 
-    local default_qb_slots = get_default_qb_slots(seablock_enabled)
+    local default_qb_slots = get_default_qb_slots(seablock_enabled, nobelts_enabled)
 
     -- Set-up a sane default for the quickbar
     for i = 1, 100 do
@@ -460,7 +469,7 @@ script.on_event(defines.events.on_player_created, function(event)
 
     global.bnw_scenario_version = game.active_mods["brave-new-world"]
     -- setup force
-    setupForce(player.force, player.surface, 0, 0, seablock_enabled)
+    setupForce(player.force, player.surface, 0, 0, seablock_enabled, nobelts_enabled)
     preventMining(player)
 end)
 
