@@ -10,6 +10,7 @@
     "dependencies": [
         "base >= 1.0",
         "? SeaBlock >= 0.5.6",
+        "? no-belts >= 0.5.1",
         "! Braver_New_World"
     ]
 }
