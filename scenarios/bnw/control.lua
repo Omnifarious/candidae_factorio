@@ -380,6 +380,12 @@ local function setupForce(force, surface, x, y, seablock_enabled)
         chest_inventory.insert{name = "gun-turret", count = 2}
         chest_inventory.insert{name = "firearm-magazine", count = 20}
     end
+
+    local logisticsAssemblerReboot_enabled = game.active_mods["LogisticAssemblingMachine-rebooted"]
+    if (logisticsAssemblerReboot_enabled) then
+        chest_inventory.insert{name = "logistic-assembling-machine", count = 4}
+    end
+
     -- solar panels and accumulators (left side)
     surface.create_entity{name = "solar-panel", position = {x - 11, y - 2}, force = force, raise_built = true}
     surface.create_entity{name = "solar-panel", position = {x - 11, y + 1}, force = force, raise_built = true}
